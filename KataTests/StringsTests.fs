@@ -1,4 +1,4 @@
-module KataTests
+module StringsTests
 
 open NUnit.Framework
 open FsUnit
