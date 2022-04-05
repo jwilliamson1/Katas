@@ -18,4 +18,12 @@ let ``growing array list works`` () =
     lst.add 4 //4
     lst.add 5 // 8
 
+    let lst2 = Lst(6) // 1
+    lst2.add 7 //2
+    lst2.add 8 //4
+    lst2.add 9 //4
+    lst2.add 10 // 8
+
+    lst.addRange lst
+
     printf "here"
