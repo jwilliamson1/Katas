@@ -179,3 +179,33 @@ let ``sorting is slower`` () =
     let sorted = Array.sort <| bigString.ToString().ToCharArray() 
     let bigString2 = new string (sorted)
     stringIsPermutationSort bigString bigString2 |> should be True
+
+
+[<TestCase("Mr John Smith")>]
+let ``urlify`` (str: string):unit =    
+    let result = List.ofSeq str
+                |> List.fold (fun urlAcc currentChar ->
+                                    match currentChar with
+                                    | currentChar when currentChar = ' ' -> '0'::'2'::'%'::urlAcc
+                                    | _ -> currentChar::urlAcc) []
+                |> List.rev
+                |> Array.ofList
+                |> System.String
+    result |> should equal "Mr%20John%20Smith"
+
+
+type PalindromeState = {
+    PreviousOddExists: bool
+    LastChar: char
+    CountOfPreviousChar: int
+}
+
+[<TestCase("Tact Coa", true)>]
+[<TestCase("Tact Koa", false)>]
+let isPalindrome (input: string, answer: bool) =
+    let result = List.ofSeq input
+                |> List.map(fun c -> Char.ToLower c)
+                |> List.sort
+                |> List.foldBack(fun (letter: char) (state: PalindromeState) ->
+                                    
+
