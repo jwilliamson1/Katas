@@ -195,17 +195,46 @@ let ``urlify`` (str: string):unit =
 
 
 type PalindromeState = {
-    PreviousOddExists: bool
+    PreviousRunOddExists: bool
     LastChar: char
     CountOfPreviousChar: int
+    isPalindrome: bool
 }
+let isPalindrome (input: string): bool =
+    let isOdd num = num % 2 <> 0
+
+    let normalized = input |> Seq.filter(Char.IsLetter) |> Seq.map(Char.ToLower)
+    let first = Seq.head normalized
+    let rest = Seq.tail normalized
+
+    let sorted = rest |> Seq.sort
+                
+    let result =
+        Seq.foldBack(fun (letter: char) (state: PalindromeState) ->
+            if not state.isPalindrome then state
+            else 
+            match letter with
+            | letter when letter = state.LastChar ->
+                { state with CountOfPreviousChar = state.CountOfPreviousChar + 1 }
+            | letter -> 
+                let latestRunWasOdd = isOdd state.CountOfPreviousChar
+                match state.PreviousRunOddExists, latestRunWasOdd with
+                | true, true -> { state with isPalindrome = false }
+                | _, _ -> { state with PreviousRunOddExists = latestRunWasOdd; LastChar = letter; CountOfPreviousChar = 1 }                
+            )
+            sorted
+            {
+                PreviousRunOddExists = false
+                LastChar = first
+                CountOfPreviousChar = 1
+                isPalindrome = true
+            }
+    result.isPalindrome
 
 [<TestCase("Tact Coa", true)>]
 [<TestCase("Tact Koa", false)>]
-let isPalindrome (input: string, answer: bool) =
-    let result = List.ofSeq input
-                |> List.map(fun c -> Char.ToLower c)
-                |> List.sort
-                |> List.foldBack(fun (letter: char) (state: PalindromeState) ->
-                                    
-
+[<TestCase("ccaaabb", true)>]
+[<TestCase("cba", false)>]
+[<TestCase("aaaccc", false)>]
+let ``test isPalindrome`` input answer =
+    isPalindrome input |> should equal answer
