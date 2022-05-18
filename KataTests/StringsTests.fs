@@ -238,3 +238,39 @@ let isPalindrome (input: string): bool =
 [<TestCase("aaaccc", false)>]
 let ``test isPalindrome`` input answer =
     isPalindrome input |> should equal answer
+
+
+let oneApart (input1: string) (input2: string) =
+    let tryChangeOneThing (first: string) (second: string) (adjuster: int -> int -> (int * int)) : bool =
+        let rec inner (alreadyAdjusted: bool) (pos1: int, pos2: int) =
+            if pos1 = (String.length first) || pos2 = (String.length second) then true
+                else
+                let currentMatches = first[pos1] = second[pos2]               
+                match currentMatches, alreadyAdjusted with
+                | true, _ -> inner alreadyAdjusted (pos1 + 1, pos2 + 1)
+                | false, false -> inner true (adjuster pos1 pos2)
+                | false, true -> false
+        inner false (0, 0)
+
+    let diff = String.length input1 - String.length input2
+    if Math.Abs diff > 1 then false
+    else
+        match diff with
+        | diff when diff = 1 -> tryChangeOneThing input1 input2 (fun i j -> i + 1, j)
+        | diff when diff = -1 -> tryChangeOneThing input2 input1 (fun i j -> i + 1, j)
+        | diff when diff = 0 -> tryChangeOneThing input1 input2 (fun i j -> i + 1, j + 1)
+        | _ -> raise <| Exception "should not get here"
+
+[<TestCase("", "p", true)>]
+[<TestCase("p", "", true)>]
+[<TestCase("", "", true)>]
+[<TestCase("", "pp", false)>]
+[<TestCase("pp", "", false)>]
+[<TestCase("pales", "ple", false)>]
+[<TestCase("pale", "ple", true)>]
+[<TestCase("pales", "pale", true)>]
+[<TestCase("pales", "ple", false)>]
+[<TestCase("pale", "bale", true)>]
+[<TestCase("pale", "bake", false)>]
+let `` test one apart`` input1 input2 answer =
+    oneApart input1 input2 |> should equal answer
